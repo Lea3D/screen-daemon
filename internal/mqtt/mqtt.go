@@ -1,8 +1,10 @@
 package mqtt
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
@@ -13,6 +15,7 @@ import (
 
 const onPayload = "ON"
 const offPayload = "OFF"
+const togglePayload = "toggle"
 const availablePayload = "online"
 const unavailablePayload = "offline"
 
@@ -97,19 +100,51 @@ func (client *Client) processSetPayload(sw *Switch, payload string) {
 	defer client.syncLog()
 	logger := client.logger.With(zap.String("switch", sw.control.Name))
 	logger.Infow("Received switch command", "payload", payload)
-	command, err := parsePayload(payload)
-	if err != nil {
-		logger.Error(err)
+
+	var commandPayload struct {
+		Switch  string `json:"switch"`
+		Command string `json:"command"`
+	}
+
+	if err := json.Unmarshal([]byte(payload), &commandPayload); err != nil {
+		logger.Errorw("Invalid JSON payload", "error", err)
 		return
 	}
-	response, err := sw.control.SwitchOnOff(command)
+
+	switch strings.ToLower(commandPayload.Command) {
+	case onPayload:
+		client.executeSwitchCommand(sw, true)
+	case offPayload:
+		client.executeSwitchCommand(sw, false)
+	case togglePayload: // Now using the defined constant
+		client.executeToggleCommand(sw)
+	default:
+		logger.Errorw("Invalid command", "command", commandPayload.Command)
+	}
+
+}
+
+func (client *Client) executeSwitchCommand(sw *Switch, state bool) {
+	response, err := sw.control.SwitchOnOff(state)
 	if err != nil {
-		logger.Errorw("Error running switch command", "error", err, "output", response)
+		client.logger.Errorw("Error running switch command", "error", err, "output", response)
 		client.setAvailable(sw, false)
 		return
 	}
-	logger.Debugw("Executed switch command successfully", "output", response)
-	client.setState(sw, command)
+	client.logger.Debugw("Executed switch command successfully", "output", response)
+	client.setState(sw, state)
+}
+
+func (client *Client) executeToggleCommand(sw *Switch) {
+	response, err := sw.control.Toggle()
+	if err != nil {
+		client.logger.Errorw("Error running toggle command", "error", err, "output", response)
+		client.setAvailable(sw, false)
+		return
+	}
+	client.logger.Debugw("Executed toggle command successfully", "output", response)
+	// Optionally refresh state after toggling
+	client.refreshOne(sw)
 }
 
 func (client *Client) Refresh() {
@@ -183,16 +218,6 @@ func (client *Client) setAppAvailable() {
 		logger.Error("Error publishing application availability to MQTT", "error", token.Error())
 	}
 	logger.Debugw("Published application availability to MQTT")
-}
-
-func parsePayload(payload string) (bool, error) {
-	if payload == onPayload {
-		return true, nil
-	} else if payload == offPayload {
-		return false, nil
-	} else {
-		return false, fmt.Errorf("invalid payload: %s", payload)
-	}
 }
 
 func generateStatePayload(state bool) string {
