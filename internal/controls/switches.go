@@ -1,6 +1,7 @@
 package controls
 
 import (
+	"fmt"
 	"os/exec"
 	"time"
 )
@@ -12,6 +13,7 @@ type Switch struct {
 	OffCmd          string        `mapstructure:"turn_off"`  // Command to turn the switch off
 	StateCmd        string        `mapstructure:"get_state"` // Command to get the current state of the switch
 	ToggleCmd       string        `mapstructure:"toggle"`    // Command to toggle the switch
+	SetValueCmd     string        `mapstructure:"set_value"` // Command template to set a value
 	RefreshInterval time.Duration `mapstructure:"refresh"`   // Interval to refresh the state of the switch
 }
 
@@ -30,6 +32,15 @@ func (sw *Switch) Toggle() (string, error) {
 		return run(sw.ToggleCmd) // Run the command to toggle the switch
 	}
 	return "", nil
+}
+
+// SetValue sets a value using the set_value command template.
+func (sw *Switch) SetValue(value int) (string, error) {
+	if sw.SetValueCmd != "" {
+		cmd := fmt.Sprintf(sw.SetValueCmd, value)
+		return run(cmd) // Execute the formatted command
+	}
+	return "", fmt.Errorf("set_value command not defined for switch %s", sw.Name)
 }
 
 // GetState executes the state command and determines if the switch is on or off.

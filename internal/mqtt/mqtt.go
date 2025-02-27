@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 const onPayload = "ON"
 const offPayload = "OFF"
 const togglePayload = "toggle"
+const setPayload = "SET"
 const availablePayload = "online"
 const unavailablePayload = "offline"
 
@@ -104,6 +106,7 @@ func (client *Client) processSetPayload(sw *Switch, payload string) {
 	var commandPayload struct {
 		Switch  string `json:"switch"`
 		Command string `json:"command"`
+		Value   string `json:"value,omitempty"`
 	}
 
 	if err := json.Unmarshal([]byte(payload), &commandPayload); err != nil {
@@ -118,6 +121,13 @@ func (client *Client) processSetPayload(sw *Switch, payload string) {
 		client.executeSwitchCommand(sw, false)
 	case togglePayload: // Now using the defined constant
 		client.executeToggleCommand(sw)
+	case setPayload:
+		value, err := strconv.Atoi(commandPayload.Value)
+		if err != nil {
+			logger.Errorw("Invalid value for set command, must be an integer", "value", commandPayload.Value, "error", err)
+			return
+		}
+		client.executeSetValueCommand(sw, value)
 	default:
 		logger.Errorw("Invalid command", "command", commandPayload.Command)
 	}
@@ -144,6 +154,18 @@ func (client *Client) executeToggleCommand(sw *Switch) {
 	}
 	client.logger.Debugw("Executed toggle command successfully", "output", response)
 	// Optionally refresh state after toggling
+	client.refreshOne(sw)
+}
+
+func (client *Client) executeSetValueCommand(sw *Switch, value int) {
+	response, err := sw.control.SetValue(value)
+	if err != nil {
+		client.logger.Errorw("Error running set value command", "error", err, "output", response)
+		client.setAvailable(sw, false)
+		return
+	}
+	client.logger.Debugw("Executed set value command successfully", "output", response)
+	// Optionally refresh state after setting value
 	client.refreshOne(sw)
 }
 
