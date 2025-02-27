@@ -2,12 +2,13 @@ package mqtt
 
 import (
 	"fmt"
-	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/haimgel/mqtt2cmd/internal/config"
-	"github.com/haimgel/mqtt2cmd/internal/controls"
-	"go.uber.org/zap"
 	"math/rand"
 	"time"
+
+	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/lea3d/mqtt2cmd/internal/config"
+	"github.com/lea3d/mqtt2cmd/internal/controls"
+	"go.uber.org/zap"
 )
 
 const onPayload = "ON"

@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
-	"github.com/haimgel/mqtt2cmd/internal/controls"
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/lea3d/mqtt2cmd/internal/controls"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 const AppName = "mqtt2cmd"

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/haimgel/mqtt2cmd/cmd"
 	"os"
 	"runtime"
+
+	"github.com/lea3d/mqtt2cmd/cmd"
 )
 
 // nolint: gochecknoglobals

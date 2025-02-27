@@ -1,11 +1,12 @@
 package logging
 
 import (
+	"os"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"os"
 )
 
 func CreateLogger(logFile string) *zap.SugaredLogger {

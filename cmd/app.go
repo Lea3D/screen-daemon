@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"github.com/haimgel/mqtt2cmd/internal/config"
-	"github.com/haimgel/mqtt2cmd/internal/logging"
-	"github.com/haimgel/mqtt2cmd/internal/mqtt"
-	"github.com/spf13/viper"
 	"time"
+
+	"github.com/lea3d/mqtt2cmd/internal/config"
+	"github.com/lea3d/mqtt2cmd/internal/logging"
+	"github.com/lea3d/mqtt2cmd/internal/mqtt"
+	"github.com/spf13/viper"
 )
 
 func Execute(version string, exit func(int), args []string) {
