@@ -1,0 +1,15 @@
+app-id: "mqtt2cmd"
+mqtt:
+  broker: "tcp://localhost:1883"
+  username: "your_mqtt_username"
+  password: "your_mqtt_password"
+
+switches:
+  - name: "Monitor Input"
+    refresh: "10m"
+    turn_on: "ddcutil setvcp 0x60 3"
+    turn_off: "ddcutil setvcp 0x60 2"
+    get_state: "ddcutil getvcp 0x60"
+
+log:
+  path: "/workspace/internal/config/mqtt2cmd.log"

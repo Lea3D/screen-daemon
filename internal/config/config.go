@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/lea3d/mqtt2cmd/internal/controls"
@@ -13,6 +12,7 @@ import (
 
 const AppName = "mqtt2cmd"
 
+// Config struct definitions
 type MqttConfig struct {
 	Broker   string  `mapstructure:"broker"`
 	User     *string `mapstructure:"username"`
@@ -30,7 +30,7 @@ type ApplicationConfig struct {
 	LoggerConfig LoggerConfig      `mapstructure:"log"`
 }
 
-// Load configuration from command-line options, config file, and environment variables
+// Load configuration from file and environment variables
 func Load(version string, exit func(int), args []string) (*ApplicationConfig, error) {
 	processCommandLineArguments(version, exit, args)
 
@@ -43,18 +43,33 @@ func Load(version string, exit func(int), args []string) (*ApplicationConfig, er
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
-	viper.SetConfigFile(viper.GetString("config"))
+	// Load config.yaml
+	viper.SetConfigFile(defaultConfigFile())
 	viper.SetDefault("app-id", AppName)
 	err = viper.ReadInConfig()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read config.yaml: %w", err)
 	}
 
 	config := ApplicationConfig{}
 	err = viper.Unmarshal(&config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal config.yaml: %w", err)
 	}
+
+	// Fallback für leere MQTT-Werte
+	if config.Mqtt.Broker == "" {
+		config.Mqtt.Broker = os.Getenv("MQTT_BROKER")
+	}
+	if config.Mqtt.User == nil || *config.Mqtt.User == "" {
+		envUser := os.Getenv("MQTT_USERNAME")
+		config.Mqtt.User = &envUser
+	}
+	if config.Mqtt.Password == nil || *config.Mqtt.Password == "" {
+		envPassword := os.Getenv("MQTT_PASSWORD")
+		config.Mqtt.Password = &envPassword
+	}
+
 	return &config, nil
 }
 
@@ -62,36 +77,13 @@ func processCommandLineArguments(versionStr string, exit func(int), args []strin
 	pflag.StringP("config", "c", defaultConfigFile(), "Configuration file path")
 	pflag.StringP("mqtt.broker", "b", "tcp://localhost:1883", "MQTT broker")
 	pflag.StringP("log.path", "l", defaultLogFile(), "Log file path")
-	helpFlag := pflag.BoolP("help", "h", false, "This help message")
-	versionFlag := pflag.BoolP("version", "v", false, "Show version")
 	_ = pflag.CommandLine.Parse(args)
-	if *helpFlag {
-		pflag.Usage()
-		exit(2)
-	}
-	if *versionFlag {
-		fmt.Printf("%s version %s\n", AppName, versionStr)
-		exit(0)
-	}
-}
-
-func defaultConfigHome() (string, error) {
-	cfgDir, err := os.UserConfigDir()
-	return filepath.Join(cfgDir, AppName), err
 }
 
 func defaultConfigFile() string {
-	configDir, err := defaultConfigHome()
-	if err != nil {
-		return ""
-	}
-	return filepath.Join(configDir, "config.yaml")
+	return "/workspace/internal/config/config.yaml"
 }
 
 func defaultLogFile() string {
-	cfgDir, err := defaultConfigHome()
-	if err != nil {
-		return ""
-	}
-	return filepath.Join(cfgDir, fmt.Sprintf("%s.log", AppName))
+	return "/workspace/internal/config/mqtt2cmd.log"
 }
