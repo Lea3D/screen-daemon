@@ -36,6 +36,8 @@ FROM debian:bookworm-slim
 # Install necessary runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y ddcutil
+
 # Ensure the config directory exists and copy a default example config if no config exists
 RUN mkdir -p /workspace/internal/config \
     && [ ! -f /workspace/internal/config/config.yaml ] && cp /workspace/internal/config/example_config.yaml /workspace/internal/config/config.yaml || true
@@ -52,3 +54,4 @@ COPY --from=build /workspace/mqtt2cmd /usr/local/bin/mqtt2cmd
 
 # Set the entry point to the application binary
 ENTRYPOINT ["/usr/local/bin/mqtt2cmd"]
+
