@@ -114,7 +114,7 @@ func (client *Client) processSetPayload(sw *Switch, payload string) {
 		return
 	}
 
-	switch strings.ToLower(commandPayload.Command) {
+	switch strings.ToUpper(commandPayload.Command) {
 	case onPayload:
 		client.executeSwitchCommand(sw, true)
 	case offPayload:
