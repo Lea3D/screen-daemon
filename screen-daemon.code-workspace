@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../../srv/docker/appdata/screen-daemon"
+		}
+	],
+	"settings": {}
+}
