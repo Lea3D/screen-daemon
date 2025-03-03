@@ -6,60 +6,42 @@ import (
 	"time"
 )
 
-// Switch struct represents a controllable switch with associated commands.
-type Switch struct {
-	Name            string        `mapstructure:"name"`      // Name of the switch
-	OnCmd           string        `mapstructure:"turn_on"`   // Command to turn the switch on
-	OffCmd          string        `mapstructure:"turn_off"`  // Command to turn the switch off
-	StateCmd        string        `mapstructure:"get_state"` // Command to get the current state of the switch
-	ToggleCmd       string        `mapstructure:"toggle"`    // Command to toggle the switch
-	SetValueCmd     string        `mapstructure:"set_value"` // Command template to set a value
-	RefreshInterval time.Duration `mapstructure:"refresh"`   // Interval to refresh the state of the switch
+// VCPCommand repräsentiert einen VCP-Befehl für den Input Source.
+type VCPCommand struct {
+	Name            string        `mapstructure:"name"`      // z.B. "HDMI"
+	SetCmd          string        `mapstructure:"set_value"` // z.B. "ddcutil setvcp 0x60 %s"
+	GetCmd          string        `mapstructure:"get_state"` // z.B. "ddcutil getvcp 0x60"
+	RefreshInterval time.Duration `mapstructure:"refresh"`   // Optional, kann überschrieben werden
 }
 
-// SwitchOnOff executes the appropriate command to switch the device on or off.
-func (sw *Switch) SwitchOnOff(state bool) (string, error) {
-	if state {
-		return run(sw.OnCmd) // Run the command to turn the switch on
-	} else {
-		return run(sw.OffCmd) // Run the command to turn the switch off
+// SetValue setzt einen Wert mithilfe des Set-Command-Templates.
+// Dabei wird der übergebene String (z.B. "0x11") eingesetzt.
+func (vc *VCPCommand) SetValue(value string) (string, error) {
+	if vc.SetCmd != "" {
+		cmd := fmt.Sprintf(vc.SetCmd, value)
+		return run(cmd)
 	}
+	return "", fmt.Errorf("set_value command not defined for VCP command %s", vc.Name)
 }
 
-// Toggle executes the toggle command if defined.
-func (sw *Switch) Toggle() (string, error) {
-	if sw.ToggleCmd != "" {
-		return run(sw.ToggleCmd) // Run the command to toggle the switch
+// GetValue führt den Get-Befehl aus und gibt den aktuellen Wert als String zurück.
+func (vc *VCPCommand) GetValue() (string, error) {
+	if vc.GetCmd != "" {
+		return run(vc.GetCmd)
 	}
-	return "", nil
+	return "", fmt.Errorf("get_state command not defined for VCP command %s", vc.Name)
 }
 
-// SetValue sets a value using the set_value command template.
-func (sw *Switch) SetValue(value int) (string, error) {
-	if sw.SetValueCmd != "" {
-		cmd := fmt.Sprintf(sw.SetValueCmd, value)
-		return run(cmd) // Execute the formatted command
-	}
-	return "", fmt.Errorf("set_value command not defined for switch %s", sw.Name)
-}
-
-// GetState executes the state command and determines if the switch is on or off.
-func (sw *Switch) GetState() (bool, string, error) {
-	out, err := run(sw.StateCmd)
-	if exitError, ok := err.(*exec.ExitError); ok {
-		if exitError.ExitCode() == 1 {
-			return false, out, nil // If exit code is 1, assume switch is off
-		} else {
-			return false, out, err // Other exit codes indicate an error
-		}
-	} else {
-		return err == nil, out, err // If no error, assume the switch is on
-	}
-}
-
-// run executes a shell command and returns its output.
+// run führt einen Shell-Befehl aus und gibt den kombinierten Output zurück.
 func run(command string) (string, error) {
-	cmd := exec.Command("/bin/sh", "-c", command) // Execute command in shell
-	out, err := cmd.CombinedOutput()              // Capture combined stdout and stderr output
+	cmd := exec.Command("/bin/sh", "-c", command)
+	out, err := cmd.CombinedOutput()
 	return string(out), err
+}
+
+// Display repräsentiert ein Hardware-Display mit einem bestimmten Input.
+type Display struct {
+	Name    string        `mapstructure:"name"`    // z.B. "Monitor 1"
+	Refresh time.Duration `mapstructure:"refresh"` // z.B. "1m"
+	Command VCPCommand    `mapstructure:"command"` // VCP-Befehl für den Input Source
 }

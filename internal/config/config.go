@@ -13,8 +13,6 @@ import (
 
 const AppName = "screendaemon"
 
-// Config struct definitions
-
 // MqttConfig holds the MQTT broker connection details
 type MqttConfig struct {
 	Broker   string  `mapstructure:"broker"`   // MQTT broker address
@@ -27,30 +25,31 @@ type LoggerConfig struct {
 	Path string `mapstructure:"path"` // Path to the log file
 }
 
-// ApplicationConfig aggregates all application-specific configuration
+// ApplicationConfig aggregates all application-specific configuration.
+// Beachte: Das Feld "Displays" ersetzt nun das alte "Switches"-Feld.
 type ApplicationConfig struct {
-	AppId        string            `mapstructure:"app-id"`   // Application ID used as MQTT topic prefix
-	Mqtt         MqttConfig        `mapstructure:"mqtt"`     // MQTT configuration
-	Switches     []controls.Switch `mapstructure:"switches"` // List of configured switches
-	LoggerConfig LoggerConfig      `mapstructure:"log"`      // Logger configuration
+	AppId        string             `mapstructure:"app-id"`   // Application ID used as MQTT topic prefix
+	Mqtt         MqttConfig         `mapstructure:"mqtt"`     // MQTT configuration
+	Displays     []controls.Display `mapstructure:"displays"` // Liste der konfigurierten Displays
+	LoggerConfig LoggerConfig       `mapstructure:"log"`      // Logger configuration
 }
 
-// Load configuration from file and environment variables
+// Load configuration from file and environment variables.
 func Load(version string, exit func(int), args []string) (*ApplicationConfig, error) {
 	processCommandLineArguments(version, exit, args)
 
-	// Bind command line flags to viper
+	// Bind command line flags to viper.
 	err := viper.BindPFlags(pflag.CommandLine)
 	if err != nil {
 		return nil, err
 	}
 
-	// Setup environment variable handling
+	// Setup environment variable handling.
 	viper.SetEnvPrefix(strings.ToUpper(AppName))
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
-	// Load the config.yaml file
+	// Load the config.yaml file.
 	viper.SetConfigFile(defaultConfigFile())
 	viper.SetDefault("app-id", AppName)
 	err = viper.ReadInConfig()
@@ -58,14 +57,14 @@ func Load(version string, exit func(int), args []string) (*ApplicationConfig, er
 		return nil, fmt.Errorf("failed to read config.yaml: %w", err)
 	}
 
-	// Unmarshal the configuration into the ApplicationConfig struct
+	// Unmarshal the configuration into the ApplicationConfig struct.
 	config := ApplicationConfig{}
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config.yaml: %w", err)
 	}
 
-	// Fallback to environment variables if MQTT config values are not set
+	// Fallback to environment variables if MQTT config values are not set.
 	if config.Mqtt.Broker == "" {
 		config.Mqtt.Broker = os.Getenv("MQTT_BROKER")
 	}
@@ -81,7 +80,7 @@ func Load(version string, exit func(int), args []string) (*ApplicationConfig, er
 	return &config, nil
 }
 
-// processCommandLineArguments sets up and parses CLI flags
+// processCommandLineArguments sets up and parses CLI flags.
 func processCommandLineArguments(versionStr string, exit func(int), args []string) {
 	pflag.StringP("config", "c", defaultConfigFile(), "Configuration file path")
 	pflag.StringP("mqtt.broker", "b", "tcp://localhost:1883", "MQTT broker")
@@ -90,19 +89,19 @@ func processCommandLineArguments(versionStr string, exit func(int), args []strin
 
 	_ = pflag.CommandLine.Parse(args)
 
-	// Display version and exit if the version flag is provided
+	// Display version and exit if the version flag is provided.
 	if viper.GetBool("version") {
 		fmt.Printf("%s version %s\n", AppName, versionStr)
 		exit(0)
 	}
 }
 
-// defaultConfigFile returns the default path to the config.yaml file
+// defaultConfigFile returns the default path to the config.yaml file.
 func defaultConfigFile() string {
 	return "/workspace/internal/config/config.yaml"
 }
 
-// defaultLogFile returns the default path to the log file
+// defaultLogFile returns the default path to the log file.
 func defaultLogFile() string {
 	return "/workspace/internal/config/screendaemon.log"
 }

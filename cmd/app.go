@@ -26,8 +26,8 @@ func Execute(version string, exit func(int), args []string) {
 	// Instrument MQTT logging
 	logging.InstrumentMqtt(logger)
 
-	// Initialize MQTT client with app configuration
-	client, err := mqtt.Init(appConfig.AppId, &appConfig.Mqtt, appConfig.Switches, logger)
+	// Initialize MQTT client with app configuration (using Displays instead of Switches)
+	client, err := mqtt.Init(appConfig.AppId, &appConfig.Mqtt, appConfig.Displays, logger)
 	if err != nil {
 		logger.Panic(err)
 	}
