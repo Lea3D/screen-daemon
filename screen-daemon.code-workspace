@@ -4,7 +4,7 @@
 			"path": "."
 		},
 		{
-			"path": "../../../../srv/docker/appdata/screen-daemon"
+			"path": "../../../../srv/docker/appdata/screendaemon"
 		}
 	],
 	"settings": {}
