@@ -28,7 +28,7 @@ COPY . .
 # Disabling CGO ensures portability across different systems
 # The '-w' flag removes debugging information, reducing binary size
 # The '-extldflags "-static"' ensures full static linking for portability
-RUN CGO_ENABLED=0 go build -o mqtt2cmd -ldflags '-w -extldflags "-static"' .
+RUN CGO_ENABLED=0 go build -o screendaemon -ldflags '-w -extldflags "-static"' .
 
 # Final runtime image using Debian Bookworm Slim
 FROM debian:bookworm-slim
@@ -47,11 +47,11 @@ VOLUME ["/workspace/internal/config"]
 
 # Bind host directory for persistent configuration storage
 RUN mkdir -p /workspace/internal/config \
-    && ln -s /srv/docker/mqtt2cmd/config /workspace/internal/config
+    && ln -s /srv/docker/screendaemon/config /workspace/internal/config
 
 # Copy only the built binary from the build stage to keep the final image minimal
-COPY --from=build /workspace/mqtt2cmd /usr/local/bin/mqtt2cmd
+COPY --from=build /workspace/screendaemon /usr/local/bin/screendaemon
 
 # Set the entry point to the application binary
-ENTRYPOINT ["/usr/local/bin/mqtt2cmd"]
+ENTRYPOINT ["/usr/local/bin/screendaemon"]
 

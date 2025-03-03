@@ -3,9 +3,10 @@ package cmd
 import (
 	"time"
 
-	"github.com/lea3d/mqtt2cmd/internal/config"
-	"github.com/lea3d/mqtt2cmd/internal/logging"
-	"github.com/lea3d/mqtt2cmd/internal/mqtt"
+	"screendaemon/internal/config"
+	"screendaemon/internal/logging"
+	"screendaemon/internal/mqtt"
+
 	"github.com/spf13/viper"
 )
 

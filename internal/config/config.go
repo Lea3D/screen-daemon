@@ -5,12 +5,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/lea3d/mqtt2cmd/internal/controls"
+	"screendaemon/internal/controls"
+
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
-const AppName = "mqtt2cmd"
+const AppName = "screendaemon"
 
 // Config struct definitions
 type MqttConfig struct {
@@ -85,5 +86,5 @@ func defaultConfigFile() string {
 }
 
 func defaultLogFile() string {
-	return "/workspace/internal/config/mqtt2cmd.log"
+	return "/workspace/internal/config/screendaemon.log"
 }

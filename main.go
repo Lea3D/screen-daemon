@@ -5,7 +5,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/lea3d/mqtt2cmd/cmd"
+	"screendaemon/cmd"
 )
 
 // nolint: gochecknoglobals

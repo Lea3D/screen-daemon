@@ -32,21 +32,21 @@ changelog:
 release:
   github:
     owner: haimgel
-    name: mqtt2cmd
+    name: screendaemon
 brews:
   - tap:
       owner: haimgel
       name: homebrew-tools
-    name: mqtt2cmd
-    homepage: "https://github.com/haimgel/mqtt2cmd"
+    name: screendaemon
+    homepage: "https://github.com/haimgel/screendaemon"
     description: "MQTT to command-line applications gateway."
     folder: Formula
     install: |
-      bin.install "mqtt2cmd"
+      bin.install "screendaemon"
     service: |
-      run [opt_bin/"mqtt2cmd"]
+      run [opt_bin/"screendaemon"]
     test: |
-      assert_match /Usage of/, shell_output("#{bin}/mqtt2cmd -h", 0)
+      assert_match /Usage of/, shell_output("#{bin}/screendaemon -h", 0)
 
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj

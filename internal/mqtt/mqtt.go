@@ -8,9 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"screendaemon/internal/config"
+	"screendaemon/internal/controls"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/lea3d/mqtt2cmd/internal/config"
-	"github.com/lea3d/mqtt2cmd/internal/controls"
 	"go.uber.org/zap"
 )
 

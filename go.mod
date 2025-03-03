@@ -1,4 +1,4 @@
-module github.com/lea3d/mqtt2cmd
+module screendaemon
 
 go 1.24
 
