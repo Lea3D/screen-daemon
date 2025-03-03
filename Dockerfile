@@ -54,4 +54,3 @@ COPY --from=build /workspace/screendaemon /usr/local/bin/screendaemon
 
 # Set the entry point to the application binary
 ENTRYPOINT ["/usr/local/bin/screendaemon"]
-

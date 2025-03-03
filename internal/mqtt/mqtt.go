@@ -142,17 +142,30 @@ func (client *Client) processSetPayload(dw *DisplayWrapper, payload string) {
 // refreshOne fragt den aktuellen Input (als hexadezimaler Wert) ab und veröffentlicht ihn.
 func (client *Client) refreshOne(dw *DisplayWrapper) {
 	logger := client.logger.With(zap.String("display", dw.display.Name))
+
 	if dw.display.Refresh != 0 && time.Now().After(dw.lastRefresh.Add(dw.display.Refresh)) {
+		// Überprüfen, ob der GetCmd gesetzt ist
+		if dw.display.Command.GetCmd == "" {
+			logger.Errorw("get_state command not defined", "display", dw.display.Name)
+			client.setAvailable(dw, false)
+			return
+		}
+
 		response, err := dw.display.Command.GetValue()
 		if err != nil {
 			logger.Errorw("Error running VCP query command", "error", err, "output", response)
+			client.setAvailable(dw, false)
+			return
 		}
+
 		dw.lastRefresh = time.Now()
 		topic := client.stateTopic(dw)
 		if err := client.publish(topic, response); err != nil {
 			logger.Errorw("Error publishing state to MQTT", "error", err)
 		}
-		client.setAvailable(dw, err == nil)
+
+		// Setze Verfügbarkeit auf "true", wenn kein Fehler aufgetreten ist
+		client.setAvailable(dw, true)
 	}
 }
 

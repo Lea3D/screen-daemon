@@ -26,11 +26,10 @@ type LoggerConfig struct {
 }
 
 // ApplicationConfig aggregates all application-specific configuration.
-// Beachte: Das Feld "Displays" ersetzt nun das alte "Switches"-Feld.
 type ApplicationConfig struct {
 	AppId        string             `mapstructure:"app-id"`   // Application ID used as MQTT topic prefix
 	Mqtt         MqttConfig         `mapstructure:"mqtt"`     // MQTT configuration
-	Displays     []controls.Display `mapstructure:"displays"` // Liste der konfigurierten Displays
+	Displays     []controls.Display `mapstructure:"displays"` // List of configured displays
 	LoggerConfig LoggerConfig       `mapstructure:"log"`      // Logger configuration
 }
 
@@ -62,6 +61,15 @@ func Load(version string, exit func(int), args []string) (*ApplicationConfig, er
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config.yaml: %w", err)
+	}
+
+	// Debug: Prüfen, ob get_state korrekt geladen wurde
+	for _, display := range config.Displays {
+		if display.Command.GetCmd == "" {
+			fmt.Printf("ERROR: get_state not defined for display %s\n", display.Name)
+		} else {
+			fmt.Printf("DEBUG: Loaded get_state for display %s: %s\n", display.Name, display.Command.GetCmd)
+		}
 	}
 
 	// Fallback to environment variables if MQTT config values are not set.
