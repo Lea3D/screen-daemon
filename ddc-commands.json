@@ -1,0 +1,156 @@
+[
+    {
+        "name": "Input Source",
+        "vcp_code": "60",
+        "description": "Selects active video source.",
+        "allowed_values": {
+            "0x01": "VGA-1",
+            "0x02": "VGA-2",
+            "0x03": "DVI-1",
+            "0x04": "DVI-2",
+            "0x05": "Composite video 1",
+            "0x06": "Composite video 2",
+            "0x07": "S-Video-1",
+            "0x08": "S-Video-2",
+            "0x09": "Tuner-1",
+            "0x0a": "Tuner-2",
+            "0x0b": "Tuner-3",
+            "0x0c": "Component video (YPrPb/YCrCb) 1",
+            "0x0d": "Component video (YPrPb/YCrCb) 2",
+            "0x0e": "Component video (YPrPb/YCrCb) 3",
+            "0x0f": "DisplayPort-1",
+            "0x10": "DisplayPort-2",
+            "0x11": "HDMI-1",
+            "0x12": "HDMI-2"
+        },
+        "commands": {
+            "get": "ddcutil getvcp 0x60",
+            "set": "ddcutil setvcp 0x60 <value>"
+        }
+    },
+    {
+        "name": "Brightness",
+        "vcp_code": "10",
+        "description": "Controls the display brightness.",
+        "allowed_values": "0 to 100 (percentage).",
+        "commands": {
+            "get": "ddcutil getvcp 0x10",
+            "set": "ddcutil setvcp 0x10 50"
+        }
+    },
+    {
+        "name": "Contrast",
+        "vcp_code": "12",
+        "description": "Adjusts the display contrast.",
+        "allowed_values": "0 to 100 (percentage).",
+        "commands": {
+            "get": "ddcutil getvcp 0x12",
+            "set": "ddcutil setvcp 0x12 50"
+        }
+    },
+    {
+        "name": "Power Mode",
+        "vcp_code": "D6",
+        "description": "Turns the monitor on or off.",
+        "allowed_values": "Commonly: 1 (On), 2 (Standby), 3 (Suspend), 4 (Off). Monitor-specific values may vary.",
+        "commands": {
+            "get": "ddcutil getvcp 0xd6",
+            "set": "ddcutil setvcp 0xd6 1"
+        }
+    },
+    {
+        "name": "Ambient Light Sensor",
+        "vcp_code": "66",
+        "description": "Automatically adjusts brightness based on ambient lighting.",
+        "allowed_values": "0 (disabled) or 1 (enabled).",
+        "commands": {
+            "get": "ddcutil getvcp 0x66",
+            "set": "ddcutil setvcp 0x66 1"
+        }
+    },
+    {
+        "name": "Color Temperature Adjustment",
+        "vcp_codes": ["0B", "0C"],
+        "description": "Allows adjustment of the color temperature (e.g., for a warmer evening mode).",
+        "allowed_values": {
+            "0B": "Monitor-specific incremental adjustment value.",
+            "0C": "Monitor-specific current color temperature value."
+        },
+        "commands": [
+            {
+                "code": "0C",
+                "action": "get",
+                "command": "ddcutil getvcp 0x0c"
+            },
+            {
+                "code": "0B",
+                "action": "set",
+                "command": "ddcutil setvcp 0x0b 10"
+            }
+        ]
+    },
+    {
+        "name": "Automatic Calibration",
+        "vcp_codes": ["1E", "1F"],
+        "description": "Automatically optimizes display geometry and color settings.",
+        "allowed_values": "Typically 0 (off) or 1 (on).",
+        "commands": [
+            {
+                "code": "1E",
+                "action": "set",
+                "command": "ddcutil setvcp 0x1e 1"
+            },
+            {
+                "code": "1F",
+                "action": "set",
+                "command": "ddcutil setvcp 0x1f 1"
+            }
+        ]
+    },
+    {
+        "name": "Backlight Fine-Tuning",
+        "vcp_code": "13",
+        "description": "Allows precise adjustment of the backlight to reduce glare.",
+        "allowed_values": "0 to 100 (percentage).",
+        "commands": {
+            "get": "ddcutil getvcp 0x13",
+            "set": "ddcutil setvcp 0x13 75"
+        }
+    },
+    {
+        "name": "Display Identification Operation",
+        "vcp_code": "78",
+        "description": "Retrieves identification details such as model and serial number.",
+        "allowed_values": "Read-only; returns monitor-specific identification data.",
+        "commands": {
+            "get": "ddcutil getvcp 0x78"
+        }
+    },
+    {
+        "name": "Display Firmware Level",
+        "vcp_code": "C9",
+        "description": "Shows the current firmware version of the monitor.",
+        "allowed_values": "Read-only; returns firmware version.",
+        "commands": {
+            "get": "ddcutil getvcp 0xc9"
+        }
+    },
+    {
+        "name": "Display Controller Type",
+        "vcp_code": "C8",
+        "description": "Provides information about the monitor's control chip.",
+        "allowed_values": "Read-only; returns controller type details.",
+        "commands": {
+            "get": "ddcutil getvcp 0xc8"
+        }
+    },
+    {
+        "name": "Asset Tag",
+        "vcp_code": "D2",
+        "description": "Provides a unique ID or serial number for monitor identification.",
+        "allowed_values": "Read-only; returns a unique asset tag or serial number.",
+        "commands": {
+            "get": "ddcutil getvcp 0xd2"
+        }
+    }
+]
