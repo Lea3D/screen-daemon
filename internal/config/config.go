@@ -78,7 +78,14 @@ func processCommandLineArguments(versionStr string, exit func(int), args []strin
 	pflag.StringP("config", "c", defaultConfigFile(), "Configuration file path")
 	pflag.StringP("mqtt.broker", "b", "tcp://localhost:1883", "MQTT broker")
 	pflag.StringP("log.path", "l", defaultLogFile(), "Log file path")
+	pflag.BoolP("version", "v", false, "Show version")
+
 	_ = pflag.CommandLine.Parse(args)
+
+	if viper.GetBool("version") {
+		fmt.Printf("%s version %s\n", AppName, versionStr)
+		exit(0)
+	}
 }
 
 func defaultConfigFile() string {
